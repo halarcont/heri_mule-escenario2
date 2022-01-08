@@ -12,14 +12,11 @@ Cosas que deben considerar:
 1. La estructura del fichero con los registros queda a discreción de ustedes, preferiblemente que contenga un registro de varios datos en texto plano. Pueden ser en formado json, en xml o pura cadena de texto con tabulaciones o separadores.
 2. El diseño de la BD y el servicio que almacena en ella debe estar en correspondencia con la estructura de los registros.
 
-Cofiguracion del FTP:
-Server IP: 
-		192.168.43.118 
-
-Server port: 	22 
-
-User:          	tester
-Password:      	password
+Cofiguracion del FTP: RebexTinySftpServer-Binaries-Latest v1.0.13
+Server IP:              192.168.43.118 
+Server port:            22 
+User:          	        tester
+Password:      	        password
 User public keys:   	(disabled) 
 User root directory: 	Z:\cursos\mule\RebexTinySftpServer-Binaries-Latest\data
 Configuration file: 	Z:\cursos\mule\RebexTinySftpServer-Binaries-Latest\RebexTinySftpServer.exe.Config
