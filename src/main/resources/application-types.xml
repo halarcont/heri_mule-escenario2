@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="persona" format="json">
+      <types:shape format="weave" example="examples/persona.json"><![CDATA[%dw 2.0
+
+type persona = {|
+  personas: {|
+    persona: Array<{|      "1ernombre": String,       "2donombre": String,       "1erapellido": String,       "2doapellido": String,       pais: String,       prov: String,       mun: String,       direccion: {|        calle: String,         entrecalles: String,         apto: String,         num: String      |}    |}>
+  |}
+|} {"example": "{\\\"personas\\\":{\\\"persona\\\":[{\\\"1ernombre\\\":\\\"pepe\\\",\\\"2donombre\\\":\\\"pepon\\\",\\\"1erapellido\\\":\\\"de la calle\\\",\\\"2doapellido\\\":\\\"santos\\\",\\\"pais\\\":\\\"CUB\\\",\\\"prov\\\":\\\"HAB\\\",\\\"mun\\\":\\\"VEDADO\\\",\\\"direccion\\\":{\\\"calle\\\":\\\"Alcala\\\",\\\"entrecalles\\\":\\\"calle mercaderes y calle compostela\\\",\\\"apto\\\":\\\"909\\\",\\\"num\\\":\\\"21\\\"}},{\\\"1ernombre\\\":\\\"pepe\\\",\\\"2donombre\\\":\\\"pepon\\\",\\\"1erapellido\\\":\\\"de la calle\\\",\\\"2doapellido\\\":\\\"santos\\\",\\\"pais\\\":\\\"CUB\\\",\\\"prov\\\":\\\"HAB\\\",\\\"mun\\\":\\\"VEDADO\\\",\\\"direccion\\\":{\\\"calle\\\":\\\"Alcala\\\",\\\"entrecalles\\\":\\\"calle mercaderes y calle compostela\\\",\\\"apto\\\":\\\"909\\\",\\\"num\\\":\\\"21\\\"}}]}}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#255a6160-953b-4022-9f28-004a9adf14a5">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="persona"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

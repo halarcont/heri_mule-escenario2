@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sftp:config name="SFTP_Config" doc:name="SFTP Config" doc:id="853ec329-649f-4549-8178-422f24a5d95e" >
+		<sftp:connection host="localhost" username="tester" password="password" />
+	</sftp:config>
+	<crypto:jce-config name="Crypto_Jce" doc:name="Crypto Jce" doc:id="ce951637-8fdd-4220-8eb5-56420af37a98" keystore="C:\Users\Heriberto\AnypointStudio\mule_escenario2\escenario_2\src\main\resources\encKeystore.jceks" type="JCEKS" password="123456" >
+		<crypto:jce-key-infos >
+			<crypto:jce-symmetric-key-info keyId="Anykeyid" alias="jksvalor" password="123456" />
+		</crypto:jce-key-infos>
+	</crypto:jce-config>
+	<flow name="escenario_2Flow" doc:id="833be50c-9bb2-4463-83ee-76eac83fe4ef" >
+		<sftp:listener doc:name="On New or Updated File" doc:id="255a6160-953b-4022-9f28-004a9adf14a5" config-ref="SFTP_Config" watermarkEnabled="true">
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES" />
+			</scheduling-strategy>
+			<sftp:matcher filenamePattern="persona.json" />
+		</sftp:listener>
+		<batch:job jobName="escenario_2Batch_Job" doc:id="421ea1d4-1a7a-49ab-af71-36893a1ea227" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="1bb82196-5b73-4d8d-987e-58c98c023902" >
+					<set-variable value="#[payload.personas]" doc:name="persona" doc:id="84acb5a7-f4c9-4349-95b7-2683322e7c0d" variableName="persona" />
+					<logger level="INFO" doc:name="Logger" doc:id="4408e1f5-08fa-4270-8468-5d3bc24cf96f" />
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="f69c3dea-14a2-4598-bae1-0dbd3b8f69ec" />
+			</batch:on-complete>
+		</batch:job>
+		<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="Anykeyid">
+						<ee:repeatable-file-store-stream inMemorySize="1024" />
+						<crypto:content><![CDATA[#["StringToEncrypt"]]]></crypto:content>
+					</crypto:jce-encrypt>
+	</flow>
+</mule>
