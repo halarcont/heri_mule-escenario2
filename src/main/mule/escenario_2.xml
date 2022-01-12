@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto"
-	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
-	xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<sftp:config name="SFTP_Config" doc:name="SFTP Config" doc:id="853ec329-649f-4549-8178-422f24a5d95e" >
 		<sftp:connection host="localhost" username="tester" password="password" />
 	</sftp:config>
 	<crypto:jce-config name="Crypto_Jce" doc:name="Crypto Jce" doc:id="ce951637-8fdd-4220-8eb5-56420af37a98" keystore="C:\Users\Heriberto\AnypointStudio\mule_escenario2\escenario_2\src\main\resources\encKeystore.jceks" type="JCEKS" password="123456" >
 		<crypto:jce-key-infos >
-			<crypto:jce-symmetric-key-info keyId="Anykeyid" alias="jksvalor" password="123456" />
+			<crypto:jce-symmetric-key-info keyId="AnyKeyID" alias="jksvalue" password="123456" />
 		</crypto:jce-key-infos>
 	</crypto:jce-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d330d419-ec4f-4da2-bbd0-32eb32635f13" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
 	<flow name="escenario_2Flow" doc:id="833be50c-9bb2-4463-83ee-76eac83fe4ef" >
 		<sftp:listener doc:name="On New or Updated File" doc:id="255a6160-953b-4022-9f28-004a9adf14a5" config-ref="SFTP_Config" watermarkEnabled="true">
 			<scheduling-strategy >
@@ -33,9 +37,22 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<logger level="INFO" doc:name="Logger" doc:id="f69c3dea-14a2-4598-bae1-0dbd3b8f69ec" />
 			</batch:on-complete>
 		</batch:job>
-		<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="Anykeyid">
+	</flow>
+	<flow name="escenario_2Flow1" doc:id="fc72e768-d431-47bc-9072-5cbf1193add9" >
+		<http:listener doc:name="Listener" doc:id="addd7c67-3320-4e3f-aff3-61e5e1ba5ea5" config-ref="HTTP_Listener_config" path="/cifrar"/>
+		<sftp:read doc:name="Read" doc:id="8f79419d-802e-4889-aace-a5f1ecb0c7a0" config-ref="SFTP_Config" path="/persona.json"/>
+		<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID">
 						<ee:repeatable-file-store-stream inMemorySize="1024" />
-						<crypto:content><![CDATA[#["StringToEncrypt"]]]></crypto:content>
 					</crypto:jce-encrypt>
+		<ee:transform doc:name="Transform Message" doc:id="a1cd1ebe-5e64-4754-aee2-abbb2f5df17d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+	payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 </mule>
