@@ -22,4 +22,13 @@ type persona = {|
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#58430368-e5f9-41c7-864e-3446242f9f03">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="persona"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>

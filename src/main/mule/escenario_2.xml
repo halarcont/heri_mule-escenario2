@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto"
-	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:crypto="http://www.mulesoft.org/schema/mule/crypto" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
 http://www.mulesoft.org/schema/mule/crypto http://www.mulesoft.org/schema/mule/crypto/current/mule-crypto.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
 	<sftp:config name="SFTP_Config" doc:name="SFTP Config" doc:id="853ec329-649f-4549-8178-422f24a5d95e" >
 		<sftp:connection host="localhost" username="tester" password="password" />
 	</sftp:config>
@@ -19,32 +20,55 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d330d419-ec4f-4da2-bbd0-32eb32635f13" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="d52d80c7-250a-4d04-b60f-61dd3e6a9308" />
 	<flow name="escenario_2Flow" doc:id="833be50c-9bb2-4463-83ee-76eac83fe4ef" >
-		<sftp:listener doc:name="On New or Updated File" doc:id="255a6160-953b-4022-9f28-004a9adf14a5" config-ref="SFTP_Config" watermarkEnabled="true">
+		<sftp:listener doc:name="On New or Updated File" doc:id="255a6160-953b-4022-9f28-004a9adf14a5" config-ref="SFTP_Config" watermarkEnabled="true" outputMimeType="application/json" directory="/">
 			<scheduling-strategy >
 				<fixed-frequency frequency="1" timeUnit="MINUTES" />
 			</scheduling-strategy>
 			<sftp:matcher filenamePattern="persona.json" />
 		</sftp:listener>
+		<ee:transform doc:name="Transform Message" doc:id="58430368-e5f9-41c7-864e-3446242f9f03" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	personas: {
+		persona: payload.personas.persona map ( persona , indexOfPersona ) -> {
+			"1ernombre": persona."1ernombre",
+			"2donombre": persona."2donombre",
+			"1erapellido": persona."1erapellido",
+			"2doapellido": persona."2doapellido",
+			pais: persona.pais,
+			prov: persona.prov,
+			mun: persona.mun,
+			direccion: persona.direccion
+		}
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<batch:job jobName="escenario_2Batch_Job" doc:id="421ea1d4-1a7a-49ab-af71-36893a1ea227" >
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="1bb82196-5b73-4d8d-987e-58c98c023902" >
-					<set-variable value="#[payload.personas]" doc:name="persona" doc:id="84acb5a7-f4c9-4349-95b7-2683322e7c0d" variableName="persona" />
-					<logger level="INFO" doc:name="Logger" doc:id="4408e1f5-08fa-4270-8468-5d3bc24cf96f" />
+					<logger level="INFO" doc:name="Logger" doc:id="4408e1f5-08fa-4270-8468-5d3bc24cf96f" message="#[payload]"/>
+					<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID">
+						<ee:repeatable-file-store-stream inMemorySize="1024" />
+					</crypto:jce-encrypt>
+					<sftp:write doc:name="Write" doc:id="40365576-fa37-486b-a360-8f264eaa3325" config-ref="SFTP_Config" path="objeto cifrado.txt"/>
 				</batch:step>
 			</batch:process-records>
 			<batch:on-complete >
-				<logger level="INFO" doc:name="Logger" doc:id="f69c3dea-14a2-4598-bae1-0dbd3b8f69ec" />
+				<logger level="INFO" doc:name="Logger" doc:id="f69c3dea-14a2-4598-bae1-0dbd3b8f69ec" message="#[payload]"/>
 			</batch:on-complete>
 		</batch:job>
 	</flow>
-	<flow name="escenario_2Flow1" doc:id="fc72e768-d431-47bc-9072-5cbf1193add9" >
-		<http:listener doc:name="Listener" doc:id="addd7c67-3320-4e3f-aff3-61e5e1ba5ea5" config-ref="HTTP_Listener_config" path="/cifrar"/>
-		<sftp:read doc:name="Read" doc:id="8f79419d-802e-4889-aace-a5f1ecb0c7a0" config-ref="SFTP_Config" path="/persona.json"/>
-		<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID">
-						<ee:repeatable-file-store-stream inMemorySize="1024" />
-					</crypto:jce-encrypt>
-		<ee:transform doc:name="Transform Message" doc:id="a1cd1ebe-5e64-4754-aee2-abbb2f5df17d" >
+	<flow name="escenario_2Flow1" doc:id="90455130-80ab-4eaf-b2ca-c47326d12c4a" >
+		<http:listener doc:name="Listener" doc:id="7ab3e92a-a353-4bd4-82bf-8a17203c5f54" config-ref="HTTP_Listener_config" path="/cifrado"/>
+		<sftp:read doc:name="Read" doc:id="5e032963-5513-4f3e-a13c-0a45aed936b8" config-ref="SFTP_Config" path="/objeto cifrado.txt"/>
+		<crypto:jce-decrypt doc:name="Jce decrypt" doc:id="ba215276-42b7-40fe-aa35-c3649ce08ed8" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID"/>
+		<ee:transform doc:name="Transform Message" doc:id="e56a19be-8587-473d-8a47-4006a1d4c6df" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
