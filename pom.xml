@@ -55,16 +55,13 @@
 		<dependency>
 			<groupId>com.mulesoft.modules</groupId>
 			<artifactId>mule-cryptography-module</artifactId>
-			<version>1.3.6</version>
-<<<<<<< HEAD
+			<version>1.3.8</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.mule.connectors</groupId>
 			<artifactId>mule-db-connector</artifactId>
 			<version>1.10.4</version>
-=======
->>>>>>> 0f25daf1bc1e45430600aadf73908dc4ecfc1456
 			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
