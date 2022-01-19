@@ -1,4 +1,4 @@
-
+{
     "persona": [
       {
         "1ernombre": "pepe",
@@ -7,27 +7,16 @@
         "2doapellido": "santos",
         "pais": "CUB",
         "prov": "HAB",
-        "mun": "VEDADO",
-        "direccion": {
-          "calle": "Alcala",
-          "entrecalles": "calle mercaderes y calle compostela",
-          "apto": "909",
-          "num": "21"
-        }
+        "mun": "VEDADO"
       },
       {
-        "1ernombre": "pepe",
-        "2donombre": "pepon",
-        "1erapellido": "de la calle",
+        "1ernombre": "jose",
+        "2donombre": "juan",
+        "1erapellido": "alfonso",
         "2doapellido": "santos",
         "pais": "CUB",
         "prov": "HAB",
-        "mun": "VEDADO",
-        "direccion": {
-          "calle": "Alcala",
-          "entrecalles": "calle mercaderes y calle compostela",
-          "apto": "909",
-          "num": "21"
-        }
+        "mun": "MARIANAO"
       }
     ]
+}

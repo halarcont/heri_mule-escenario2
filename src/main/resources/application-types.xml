@@ -1,32 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
   <types:catalog>
-    <types:type name="persona" format="json">
-      <types:shape format="weave" example="examples/persona.json"><![CDATA[%dw 2.0
+    <types:type name="airtravel" format="csv">
+      <types:shape format="weave"><![CDATA[%dw 2.0
 
-type persona = {|
-  personas: {|
-    persona: Array<{|      "1ernombre": String,       "2donombre": String,       "1erapellido": String,       "2doapellido": String,       pais: String,       prov: String,       mun: String,       direccion: {|        calle: String,         entrecalles: String,         apto: String,         num: String      |}    |}>
-  |}
-|} {"example": "{\\\"personas\\\":{\\\"persona\\\":[{\\\"1ernombre\\\":\\\"pepe\\\",\\\"2donombre\\\":\\\"pepon\\\",\\\"1erapellido\\\":\\\"de la calle\\\",\\\"2doapellido\\\":\\\"santos\\\",\\\"pais\\\":\\\"CUB\\\",\\\"prov\\\":\\\"HAB\\\",\\\"mun\\\":\\\"VEDADO\\\",\\\"direccion\\\":{\\\"calle\\\":\\\"Alcala\\\",\\\"entrecalles\\\":\\\"calle mercaderes y calle compostela\\\",\\\"apto\\\":\\\"909\\\",\\\"num\\\":\\\"21\\\"}},{\\\"1ernombre\\\":\\\"pepe\\\",\\\"2donombre\\\":\\\"pepon\\\",\\\"1erapellido\\\":\\\"de la calle\\\",\\\"2doapellido\\\":\\\"santos\\\",\\\"pais\\\":\\\"CUB\\\",\\\"prov\\\":\\\"HAB\\\",\\\"mun\\\":\\\"VEDADO\\\",\\\"direccion\\\":{\\\"calle\\\":\\\"Alcala\\\",\\\"entrecalles\\\":\\\"calle mercaderes y calle compostela\\\",\\\"apto\\\":\\\"909\\\",\\\"num\\\":\\\"21\\\"}}]}}"}
+type airtravel = Array<{|  Month: String,   "1958": Number,   "1959": Number,   "1960": Number|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
 
 ]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
     </types:type>
   </types:catalog>
   <types:enrichment select="#255a6160-953b-4022-9f28-004a9adf14a5">
     <types:processor-declaration>
       <types:output-event>
         <types:message>
-          <types:payload type="persona"/>
+          <types:payload type="airtravel"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#58430368-e5f9-41c7-864e-3446242f9f03">
+  <types:enrichment select="#55e3d833-fd78-4c24-b6c8-6694006c3cdc">
     <types:processor-declaration>
       <types:output-event>
         <types:message>
-          <types:payload type="persona"/>
+          <types:payload type="airtravel"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
