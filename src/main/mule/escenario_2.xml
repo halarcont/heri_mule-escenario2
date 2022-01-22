@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<sftp:config name="SFTP_Config" doc:name="SFTP Config" doc:id="853ec329-649f-4549-8178-422f24a5d95e" >
 		<sftp:connection host="localhost" username="tester" password="password" />
 	</sftp:config>
-	<crypto:jce-config name="Crypto_Jce" doc:name="Crypto Jce" doc:id="ce951637-8fdd-4220-8eb5-56420af37a98" keystore="C:\Users\Heriberto\AnypointStudio\mule_escenario2\escenario_2\src\main\resources\encKeystore.jceks" type="JCEKS" password="123456" >
+	<crypto:jce-config name="Crypto_Jce" doc:name="Crypto Jce" doc:id="ce951637-8fdd-4220-8eb5-56420af37a98" keystore="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\src\main\resources\encKeystore.jceks" type="JCEKS" password="123456" >
 		<crypto:jce-key-infos >
 			<crypto:jce-symmetric-key-info keyId="AnyKeyID" alias="jksvalue" password="123456" />
 		</crypto:jce-key-infos>
@@ -26,6 +26,9 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="ab9d2ed7-03d7-432c-a877-87c7337d89b4" >
 		<db:generic-connection url="jdbc:postgresql://localhost:5432/mule_esc2" driverClassName="org.postgresql.Driver" user="postgres" password="postgres" />
 	</db:config>
+	<amqp:config name="AMQP_Config" doc:name="AMQP Config" doc:id="3b4bf401-c3e7-402e-b5f3-853c07b9cb04" >
+		<amqp:connection host="localhost" username="guest" password="guest" />
+	</amqp:config>
 	<flow name="escenario_2Flow" doc:id="833be50c-9bb2-4463-83ee-76eac83fe4ef" >
 		<sftp:listener doc:name="On New or Updated File" doc:id="255a6160-953b-4022-9f28-004a9adf14a5" config-ref="SFTP_Config" watermarkEnabled="true" outputMimeType="text/csv" directory="/">
 			<scheduling-strategy >
@@ -44,12 +47,21 @@ payload ]]></ee:set-payload>
 		<batch:job jobName="escenario_2Batch_Job" doc:id="421ea1d4-1a7a-49ab-af71-36893a1ea227" >
 			<batch:process-records >
 				<batch:step name="Batch_Step" doc:id="1bb82196-5b73-4d8d-987e-58c98c023902" >
-					<set-variable value='#["AUTO_GEN" ++ random() ++ ".txt"]' doc:name="Set Variable" doc:id="7538feb1-3e5f-454d-9724-86a0c97f0110" variableName="nombre" />
+					<set-variable value='#["/cifrado/AUTO_GEN" ++ random() ++ ".txt"]' doc:name="Set Variable" doc:id="7538feb1-3e5f-454d-9724-86a0c97f0110" variableName="nombre" />
 					<crypto:jce-encrypt doc:name="Jce encrypt" doc:id="72dbbf2d-de2d-4d64-8a83-b800d1a4a96f" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID">
 						<ee:repeatable-file-store-stream inMemorySize="1024" />
 					</crypto:jce-encrypt>
 					<sftp:write doc:name="Write" doc:id="40365576-fa37-486b-a360-8f264eaa3325" config-ref="SFTP_Config" path="#[vars.nombre]"/>
 					<logger level="INFO" doc:name="Logger" doc:id="80241159-b4c8-40ba-b33a-6d6bf468f46e" message="#[payload]"/>
+					<amqp:publish doc:name="Publish" doc:id="294de263-3d5a-4aae-a999-e25766aa0022" config-ref="AMQP_Config" exchangeName="amq.topic">
+						<amqp:message >
+							<amqp:body ><![CDATA[#[output application/json
+---
+{
+	"filename": vars.nombre
+}]]]></amqp:body>
+						</amqp:message>
+					</amqp:publish>
 				</batch:step>
 			</batch:process-records>
 			<batch:on-complete >
@@ -58,34 +70,35 @@ payload ]]></ee:set-payload>
 		</batch:job>
 	</flow>
 	<flow name="escenario_2Flow1" doc:id="1ec0c68a-c1b9-4a72-8358-05d9ec341468" >
-		<http:listener doc:name="Listener" doc:id="b955278a-ff3f-4fe7-8821-6fe331d91e41" config-ref="HTTP_Listener_config" path="/cifrado"/>
-		<sftp:read doc:name="Read" doc:id="5e032963-5513-4f3e-a13c-0a45aed936b8" config-ref="SFTP_Config" path="#[vars.nombre]" />
+		<amqp:listener doc:name="Listener" doc:id="ed78eb45-319c-4a77-b792-0b3f345125ae" config-ref="AMQP_Config" queueName="airtravel"/>
+		<sftp:read doc:name="Read" doc:id="5e032963-5513-4f3e-a13c-0a45aed936b8" config-ref="SFTP_Config" path="#[payload.filename]" />
 		<crypto:jce-decrypt doc:name="Jce decrypt" doc:id="ba215276-42b7-40fe-aa35-c3649ce08ed8" config-ref="Crypto_Jce" algorithm="AES" keyId="AnyKeyID" />
 		<ee:transform doc:name="Transform Message" doc:id="e0ccc620-064d-40ad-ac27-62fb1e6365e3">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
+
+input payload application/octet-stream
+
 output application/json
+
 ---
 
-	payload
+read(payload, "application/json")
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="37176248-5351-481b-9788-cdaeb24e3958" message="#[payload]"/>
 		<db:insert doc:name="Insert" doc:id="7fdadd39-28b0-4417-bb0e-7d5e3eeba096" config-ref="Database_Config">
-			<db:sql><![CDATA[INSERT INTO persona(primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, pais, provincia, municipio, direccion)
-VALUES (1ernombre, 2donombre, 1erapellido, 2doapellido, pais, prov, mun)]]></db:sql>
-			<db:input-parameters><![CDATA[#[output application/json
+			<db:sql><![CDATA[INSERT INTO airtravel(mes, year1958, year1959, year1960)
+VALUES (:mes, :year1958, :year1959, :year1960)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[output application/json
+
 ---
 {
-	persona: payload.persona map ( persona , indexOfPersona ) -> {
-		"1ernombre": persona."1ernombre",
-		"2donombre": persona."2donombre",
-		"1erapellido": persona."1erapellido",
-		"2doapellido": persona."2doapellido",
-		"pais": persona."pais",
-		"prov": persona."prov",
-		"mun": persona."mun"
-	}
+	mes: payload.Month,
+	year1958: payload."1958" as Number,
+	year1959: payload."1959" as Number,
+	year1960: payload."1960" as Number
 }]]]></db:input-parameters>
 		</db:insert>
 	</flow>
