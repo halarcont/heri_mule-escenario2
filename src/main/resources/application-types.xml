@@ -4,7 +4,7 @@
     <types:type name="airtravel" format="csv">
       <types:shape format="weave"><![CDATA[%dw 2.0
 
-type airtravel = Array<{|  Month: String,   "1958": Number,   "1959": Number,   "1960": Number|}> {"isQuotedString": "false",
+type airtravel = Array<{|  Month: String,   Y1958: Number,   Y1959: Number,   Y1960: Number|}> {"isQuotedString": "false",
 "header": "true",
 "headerLineNumber": "0"}
 

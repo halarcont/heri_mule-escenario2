@@ -96,9 +96,9 @@ VALUES (:mes, :year1958, :year1959, :year1960)]]></db:sql>
 ---
 {
 	mes: payload.Month,
-	year1958: payload."1958" as Number,
-	year1959: payload."1959" as Number,
-	year1960: payload."1960" as Number
+	year1958: payload.Y1958,
+	year1959: payload.Y1959,
+	year1960: payload.Y1960
 }]]]></db:input-parameters>
 		</db:insert>
 	</flow>
