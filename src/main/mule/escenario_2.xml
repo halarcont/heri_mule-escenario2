@@ -54,9 +54,6 @@ payload ]]></ee:set-payload>
 					</crypto:jce-encrypt>
 						<sftp:write doc:name="Write" doc:id="40365576-fa37-486b-a360-8f264eaa3325" config-ref="SFTP_Config" path="#[vars.nombre]" />
 						<error-handler >
-							<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="bb0f1cb3-588e-4079-b724-c423edeaf4e8" type="SFTP:CONNECTIVITY">
-								<logger level="INFO" doc:name="Logger" doc:id="f5405d1d-7c52-425d-a0e3-c72c6a668f83" />
-							</on-error-propagate>
 							<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="7c1c3e5f-12da-4274-8f8c-5348fe8a903c" type="ANY">
 								<ee:transform doc:name="Transform Message" doc:id="d4549813-ee09-4a05-83b4-2cf79ca21df0" >
 									<ee:message >
@@ -68,6 +65,7 @@ output application/json
 }]]></ee:set-payload>
 									</ee:message>
 								</ee:transform>
+								<file:write doc:name="Write" doc:id="05b6d637-985c-4a45-a589-c93eb6378a83" path="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\ficheros no procesados\ficheros no procesados.txt"/>
 							</on-error-continue>
 						</error-handler>
 					</try>
@@ -87,10 +85,19 @@ output application/json
 				<logger level="INFO" doc:name="Logger" doc:id="f69c3dea-14a2-4598-bae1-0dbd3b8f69ec" message="#[payload]"/>
 			</batch:on-complete>
 		</batch:job>
-		<error-handler >
-			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="9afc0466-9c07-47f6-983a-2f15b25d7f36" type="SFTP:ACCESS_DENIED, SFTP:CONNECTIVITY, SFTP:FILE_ALREADY_EXISTS, SFTP:FILE_LOCK, SFTP:ILLEGAL_CONTENT, SFTP:ILLEGAL_PATH, SFTP:RETRY_EXHAUSTED">
-				<logger level="INFO" doc:name="Logger" doc:id="e063450f-d31f-4ae7-9830-2bfca7f40259" message="#[payload]"/>
-			</on-error-propagate>
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34341f7b-520b-4dcc-a319-c579a8264f01" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="cbd3c93b-167c-4f0c-aba3-bd59fc3fa2a2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
 		</error-handler>
 	</flow>
 	<flow name="escenario_2Flow1" doc:id="1ec0c68a-c1b9-4a72-8358-05d9ec341468" >
@@ -130,7 +137,7 @@ VALUES (:mes, :year1958, :year1959, :year1960)]]></db:sql>
 				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="31d42d1d-b423-4df9-8427-eeff751e27c8" type="DB:CONNECTIVITY">
 					<logger level="INFO" doc:name="Logger" doc:id="d2474d53-a792-4c73-9543-1305bc333341" />
 				</on-error-propagate>
-				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a6aa27e1-e402-4c55-aa4a-baaf6710eb0c" >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a6aa27e1-e402-4c55-aa4a-baaf6710eb0c" type="DB:BAD_SQL_SYNTAX, DB:QUERY_EXECUTION, DB:RETRY_EXHAUSTED, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
 					<ee:transform doc:name="Transform Message" doc:id="7cff8b8f-2ca0-4d81-ac18-de8a0ac7a2c4" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
