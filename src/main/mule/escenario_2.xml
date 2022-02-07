@@ -65,7 +65,6 @@ output application/json
 }]]></ee:set-payload>
 									</ee:message>
 								</ee:transform>
-								<file:write doc:name="Write" doc:id="05b6d637-985c-4a45-a589-c93eb6378a83" path="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\ficheros no procesados\ficheros no procesados.txt"/>
 							</on-error-continue>
 						</error-handler>
 					</try>
@@ -141,13 +140,14 @@ VALUES (:mes, :year1958, :year1959, :year1960)]]></db:sql>
 					<ee:transform doc:name="Transform Message" doc:id="7cff8b8f-2ca0-4d81-ac18-de8a0ac7a2c4" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 {
 	"message": error.description
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
+					<file:write doc:name="Write" doc:id="017518e1-6f8a-447a-ba9d-7fba4cfa31a9" path="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\ficheros no procesados\ficheros no procesados.txt" />
 				</on-error-continue>
 			</error-handler>
 		</try>
