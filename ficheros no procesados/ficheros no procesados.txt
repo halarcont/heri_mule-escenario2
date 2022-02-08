@@ -1,3 +1,25 @@
 {
-  "message": "Cannot convert an instance of java.lang.String to type int"
+  "message": "Cannot convert an instance of java.lang.String to type int",
+  "object": {
+    "Month": "DEC",
+    "Y1958": "hdhf",
+    "Y1959": "405",
+    "Y1960": "432"
+  }
+}{
+  "message": "Cannot convert an instance of java.lang.String to type int",
+  "object": {
+    "Month": "JAN",
+    "Y1958": "xxxxxyyy",
+    "Y1959": "360",
+    "Y1960": "417"
+  }
+}{
+  "message": "Cannot convert an instance of java.lang.String to type int",
+  "object": {
+    "Month": "DEC",
+    "Y1958": "hdhfkpp",
+    "Y1959": "405",
+    "Y1960": "432"
+  }
 }

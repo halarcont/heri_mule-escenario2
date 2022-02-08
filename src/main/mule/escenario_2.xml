@@ -137,17 +137,19 @@ VALUES (:mes, :year1958, :year1959, :year1960)]]></db:sql>
 					<logger level="INFO" doc:name="Logger" doc:id="d2474d53-a792-4c73-9543-1305bc333341" />
 				</on-error-propagate>
 				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a6aa27e1-e402-4c55-aa4a-baaf6710eb0c" type="DB:BAD_SQL_SYNTAX, DB:QUERY_EXECUTION, DB:RETRY_EXHAUSTED, EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
+					<set-variable value="#[payload]" doc:name="Set Variable" doc:id="06ac72d5-f491-4768-963d-41b182ee34cb" variableName="tupla_mala"/>
 					<ee:transform doc:name="Transform Message" doc:id="7cff8b8f-2ca0-4d81-ac18-de8a0ac7a2c4" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	"message": error.description
+	"message": error.description,
+	"object": vars.tupla_mala
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<file:write doc:name="Write" doc:id="017518e1-6f8a-447a-ba9d-7fba4cfa31a9" path="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\ficheros no procesados\ficheros no procesados.txt" />
+					<file:write doc:name="Write" doc:id="017518e1-6f8a-447a-ba9d-7fba4cfa31a9" path="C:\Users\Heriberto\AnypointStudio\heri_mule-escenario2\ficheros no procesados\ficheros no procesados.txt" mode="APPEND"/>
 				</on-error-continue>
 			</error-handler>
 		</try>
